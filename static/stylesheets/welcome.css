@@ -5,11 +5,23 @@
     justify-content: space-around;
 }
 
+.title-bar {
+    margin: 10px;
+    padding: 8px;
+    background-color: #FA7268;
+}
+
 .title {
     font-family: 'Open Sans', sans-serif;
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 600;
+    margin: 20px 0px;
+}
+
+.divider {
+    height: 2px;
     margin: 10px;
+    background-color: #666999;
 }
 
 .content {
