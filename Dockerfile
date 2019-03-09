@@ -7,6 +7,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflag
 FROM scratch
 COPY --from=builder /build/main /app/
 COPY /static/stylesheets/* /app/static/stylesheets/
+COPY /static/images/* /app/static/iamges/
 COPY /templates/* /app/templates/
 WORKDIR /app
 EXPOSE 8080
