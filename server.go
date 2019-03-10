@@ -16,6 +16,12 @@ func main() {
 			http.FileServer(
 				http.Dir("static"))))
 
+	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		if err := templates.ExecuteTemplate(w, "test.html", nil); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if err := templates.ExecuteTemplate(w, "welcome.html", nil); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
