@@ -3,11 +3,27 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
+func getTemplateFileNames(templateDir string) []string {
+	fileInfos, err := ioutil.ReadDir(templateDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var files []string
+	for _, fileInfo := range fileInfos {
+		files = append(files, templateDir+fileInfo.Name())
+	}
+	return files
+}
+
 func main() {
-	templates := template.Must(template.ParseFiles("templates/welcome.html"))
+	files := getTemplateFileNames("templates/")
+	templates := template.Must(template.ParseFiles(files...))
 
 	http.Handle(
 		"/static/",
