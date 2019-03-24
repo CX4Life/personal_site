@@ -13,7 +13,8 @@ const StyledHeader = styled.div`
 
 const StyledTitle = styled.div`
     font-weight: 600;
-    margin: 0.5em;
+    margin: 0.3em;
+    margin-left: 3em;
     font-size: 30px;
     width: 40%;
     min-width: 180px;
@@ -22,20 +23,29 @@ const StyledTitle = styled.div`
 const StyledLinks = styled.div`
     font-size: 16px;
     display: flex;
-    flex-direction: row-reverse;
+    width: 60%;
+    margin-right: 6em;
+    justify-content: flex-end;
 `;
 
 const Link = styled.a`
-    /* ... */
+    text-decoration: none;
+    color: #333;
+    padding: 0.5em;
 `;
 
 export default class Header extends Component {
     state = {
         title: 'Tim Woods',
-        tabs: [{
-            name: 'GitHub',
-            link: 'https://www.github.com/cx4life'
-        },
+        tabs: [
+            {
+                name: 'GitHub',
+                link: 'https://www.github.com/cx4life'
+            },
+            {
+                name: 'LinkedIn',
+                link: 'https://www.linkedin.com/in/tim--woods'
+            }
         ],
     };
 
