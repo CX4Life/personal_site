@@ -3,15 +3,6 @@
   --default-padding: 12px 120px;
 }
 
-.posts {
-  font-size: 14px;
-  flex-direction: column;
-  justify-content: flex-start;
-  text-align: left;
-  padding: var(--default-padding);
-  top: 30px;
-}
-
 html, body {
   margin: 0;
 }

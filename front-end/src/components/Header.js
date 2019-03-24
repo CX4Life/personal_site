@@ -7,14 +7,13 @@ const StyledHeader = styled.div`
     display: flex;
     flex-direction: row;
     align-items: baseline;
-    position: fixed;
     font-family: 'Source Sans Pro', sans-serif;
 `;
 
 const StyledTitle = styled.div`
     font-weight: 600;
     margin: 0.3em;
-    margin-left: 3em;
+    margin-left: 120px;
     font-size: 30px;
     width: 40%;
     min-width: 180px;
@@ -24,7 +23,7 @@ const StyledLinks = styled.div`
     font-size: 16px;
     display: flex;
     width: 60%;
-    margin-right: 6em;
+    margin-right: 120px;
     justify-content: flex-end;
 `;
 
