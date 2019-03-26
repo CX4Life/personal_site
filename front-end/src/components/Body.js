@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
     font-family: 'Roboto Condensed', sans-serif;
-    margin-left: 120px;
-    margin-right: 120px;
+    margin-left: 60px;
+    margin-right: 60px;
 `;
 
 export default class Body extends Component {

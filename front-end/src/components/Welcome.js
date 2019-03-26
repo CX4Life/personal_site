@@ -6,18 +6,16 @@ const lightTextColor = 'color: #333;';
 const StyledWelcome = styled.div`
     font-family: 'Roboto Condensed', sans-serif;
     margin-block-start: 3em;
+    border-bottom: 2px solid #0abab5;
 `;
 
 const StyledTitle = styled.h2`
     /* ... */
 `;
 
-const StyledSubtitle = styled.h4`
-    ${lightTextColor}
-`;
-
 const StyledSplash = styled.p`
     ${lightTextColor}
+    margin-block-end: 2em;
 `;
 
 export default class Welcome extends Component {
@@ -35,9 +33,6 @@ export default class Welcome extends Component {
                 <StyledTitle>
                     {this.props.welcomeTitle || this.state.defaultTitle}
                 </StyledTitle>
-                <StyledSubtitle>
-                    {this.props.welcomeSubtitle || this.state.defaultSubtitle}
-                </StyledSubtitle>
                 <StyledSplash>
                     {this.props.welcomeSplash || this.state.defaultSplash}
                 </StyledSplash>

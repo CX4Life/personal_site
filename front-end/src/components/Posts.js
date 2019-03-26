@@ -7,13 +7,10 @@ const StyledPost = styled.div`
 `;
 
 export default class Posts extends Component {
-    state = {
-        body: 'This is the personal site of Tim Woods.'
-    };
 
     render() {
         return (
-            <StyledPost>{this.state.body}</StyledPost>
+            <StyledPost></StyledPost>
         );
     }
 }

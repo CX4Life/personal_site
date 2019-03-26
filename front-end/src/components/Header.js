@@ -13,7 +13,7 @@ const StyledHeader = styled.div`
 const StyledTitle = styled.div`
     font-weight: 600;
     margin: 0.3em;
-    margin-left: 120px;
+    margin-left: 60px;
     font-size: 30px;
     width: 40%;
     min-width: 180px;
