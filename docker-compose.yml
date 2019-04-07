@@ -3,9 +3,35 @@ services:
   front-end:
     build:
       context: ./front-end/
+      dockerfile: Dockerfile
     command: npm start
     volumes:
       - ./front-end/:/usr/app
       - /usr/app/node_modules
+    environment:
+      - MONGO_DB_USER:${DB_USER}
+      - MONDO_DB_PASSWORD:${DB_PASSWORD}
     ports:
-      - '8000:3000'
+      - ${APP_PORT}:3000'
+    networks:
+      - appnet
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - ${DB_PORT}:27017"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+      - MONGODB_USER=${DB_USER}
+      - MONGODB_PASS=${DB_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - appnet
+  networks:
+    appnet:
+      driver: bridge
+  volumes:
+    mongo_data:
+      driver: local

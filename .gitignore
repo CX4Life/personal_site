@@ -10,3 +10,6 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+#Secrets stored in .env file for docker-compose, so don't check them in
+.env

@@ -13,7 +13,7 @@ export default class Body extends Component {
         return (
             <Wrapper>
                 <Welcome welcomeTitle="Hi."></Welcome>
-                {/* <Posts></Posts> */}
+                <Posts></Posts>
             </Wrapper>
         )
     }
