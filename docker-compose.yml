@@ -12,14 +12,14 @@ services:
       - MONGO_DB_USER:${DB_USER}
       - MONDO_DB_PASSWORD:${DB_PASSWORD}
     ports:
-      - ${APP_PORT}:3000'
+      - "${APP_PORT}:3000"
     networks:
       - appnet
   mongo:
     container_name: mongo
     image: mongo
     ports:
-      - ${DB_PORT}:27017"
+      - "${DB_PORT}:27017"
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
@@ -29,9 +29,9 @@ services:
       - mongo_data:/data/db
     networks:
       - appnet
-  networks:
-    appnet:
-      driver: bridge
-  volumes:
-    mongo_data:
-      driver: local
+networks:
+  appnet:
+    driver: bridge
+volumes:
+  mongo_data:
+    driver: local
