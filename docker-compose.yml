@@ -9,8 +9,8 @@ services:
       - ./front-end/:/usr/app
       - /usr/app/node_modules
     environment:
-      - MONGO_DB_USER:${DB_USER}
-      - MONDO_DB_PASSWORD:${DB_PASSWORD}
+      - MONGO_DB_USER=${DB_USER}
+      - MONDO_DB_PASSWORD=${DB_PASSWORD}
     ports:
       - "${APP_PORT}:3000"
     networks:
