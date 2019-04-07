@@ -13,3 +13,6 @@
 
 #Secrets stored in .env file for docker-compose, so don't check them in
 .env
+
+#Mac OS X
+.DS_store
