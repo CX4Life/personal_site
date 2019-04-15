@@ -14,5 +14,8 @@
 #Secrets stored in .env file for docker-compose, so don't check them in
 .env
 
+#VS Code
+.vscode
+
 #Mac OS X
 .DS_store
