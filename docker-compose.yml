@@ -22,6 +22,7 @@ services:
     command: jwtServer
     environment:
       - JWT_SIGNING_KEY:${JWT_SIGNING_KEY}
+      - TIM_PASSWORD:${TIM_PASSWORD}
     ports: 
       - "${AUTH_PORT}:3001"
     networks:
