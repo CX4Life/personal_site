@@ -53,7 +53,7 @@ def convert_markdown_to_body(markdown_filename):
 def create_json_file(filename, contents):
     file_with_path_and_ext = os.path.join(JSON_PATH, filename + ".json")
     with open(file_with_path_and_ext, "w") as output_file:
-        json.dump(contents, output_file, indent=2)
+        json.dump(contents, output_file)
 
 
 def main():

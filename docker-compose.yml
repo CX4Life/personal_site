@@ -15,6 +15,17 @@ services:
       - "${APP_PORT}:3000"
     networks:
       - appnet
+  auth:
+    build:
+      context: ./auth/
+      dockerfile: Dockerfile
+    command: jwtServer
+    environment:
+      - JWT_SIGNING_KEY:${JWT_SIGNING_KEY}
+    ports: 
+      - "${AUTH_PORT}:3001"
+    networks:
+      - appnet
   mongo:
     container_name: mongo
     image: mongo
