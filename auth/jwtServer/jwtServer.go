@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -104,7 +105,16 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.Username)))
 }
 
+func printEnvVars() {
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		fmt.Println(pair[0], pair[1])
+	}
+}
+
 func main() {
+	printEnvVars()
+
 	http.HandleFunc("/issue", issueJwt)
 	http.HandleFunc("/verify", verifyJwt)
 

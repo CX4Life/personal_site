@@ -21,29 +21,13 @@ services:
       dockerfile: Dockerfile
     command: jwtServer
     environment:
-      - JWT_SIGNING_KEY:${JWT_SIGNING_KEY}
-      - TIM_PASSWORD:${TIM_PASSWORD}
+      - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
+      - TIM_PASSWORD=${TIM_PASSWORD}
     ports: 
       - "${AUTH_PORT}:3001"
-    networks:
-      - appnet
-  mongo:
-    container_name: mongo
-    image: mongo
-    ports:
-      - "${DB_PORT}:27017"
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/dev/null
-      - MONGODB_USER=${DB_USER}
-      - MONGODB_PASS=${DB_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
     networks:
       - appnet
 networks:
   appnet:
     driver: bridge
-volumes:
-  mongo_data:
-    driver: local
+
