@@ -35,7 +35,7 @@ func issueJwt(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 
-	if err != nil {
+	if _, ok := users[creds.Username]; err != nil || !ok {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -72,7 +72,6 @@ func issueJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func verifyJwt(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Header, r.Body, r.URL, r.RemoteAddr)
 	var tokenStruct TokenJSON
 	err := json.NewDecoder(r.Body).Decode(&tokenStruct)
 	if err != nil {
