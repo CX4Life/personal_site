@@ -20,9 +20,12 @@ services:
       context: ./auth/
       dockerfile: Dockerfile
     command: jwtServer
+    volumes:
+      - /var/log/jwtserver/:/var/log/jwtserver
     environment:
       - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
       - TIM_PASSWORD=${TIM_PASSWORD}
+      - LOG_PATH=${AUTH_LOG_PATH}
     ports: 
       - "${AUTH_PORT}:3001"
     networks:

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -37,6 +36,7 @@ func issueJwt(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&creds)
 
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -72,6 +72,7 @@ func issueJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func verifyJwt(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Header, r.Body, r.URL, r.RemoteAddr)
 	var tokenStruct TokenJSON
 	err := json.NewDecoder(r.Body).Decode(&tokenStruct)
 	if err != nil {
@@ -105,19 +106,33 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.Username)))
 }
 
-func printEnvVars() {
-	for _, e := range os.Environ() {
-		pair := strings.Split(e, "=")
-		fmt.Println(pair[0], pair[1])
+func openLogFile(logfile string) {
+	if logfile != "" {
+		lf, err := os.OpenFile(logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
+
+		if err != nil {
+			log.Fatal("OpenLogfile: os.OpenFile:", err)
+		}
+
+		log.SetOutput(lf)
 	}
 }
 
+func logRequest(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s %s\n", r.RemoteAddr, r.Method, r.URL, r.Body)
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	printEnvVars()
+	logpath := os.Getenv("LOG_PATH")
+	openLogFile(logpath)
+
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	http.HandleFunc("/issue", issueJwt)
 	http.HandleFunc("/verify", verifyJwt)
 
-	// start the server on port 8000
-	log.Fatal(http.ListenAndServe(":3001", nil))
+	log.Fatal(http.ListenAndServe(":3001", logRequest(http.DefaultServeMux)))
 }
