@@ -101,8 +101,8 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.Username)))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(fmt.Sprintf("{\"username\":\"%s\"}", claims.Username)))
 }
 
 func openLogFile(logfile string) {
