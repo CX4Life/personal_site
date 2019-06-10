@@ -19,3 +19,6 @@
 
 #Mac OS X
 .DS_store
+
+#Redis data volume
+/data
