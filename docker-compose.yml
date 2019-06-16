@@ -3,8 +3,7 @@ services:
   front-end:
     build:
       context: ./front-end/
-      dockerfile: Dockerfile
-    command: npm start
+      dockerfile: Dockerfile-prod
     volumes:
       - ./front-end/:/usr/app
       - /usr/app/node_modules
@@ -12,7 +11,7 @@ services:
       - MONGO_DB_USER=${DB_USER}
       - MONDO_DB_PASSWORD=${DB_PASSWORD}
     ports:
-      - "${APP_PORT}:3000"
+      - "${APP_HOST_PORT}:${APP_CONT_PORT}"
     networks:
       - appnet
   auth:
@@ -21,34 +20,36 @@ services:
       dockerfile: Dockerfile
     command: jwtServer
     volumes:
-      - /private/var/log/jwtserver/:/var/log/jwtserver
+      - ./auth_logs:/var/log/jwtserver
     environment:
       - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
       - TIM_PASSWORD=${TIM_PASSWORD}
       - LOG_PATH=${AUTH_LOG_PATH}
     ports: 
-      - "${AUTH_PORT}:3001"
+      - "${AUTH_HOST_PORT}:${AUTH_CONT_PORT}"
     networks:
       - appnet
   redis:
     image: redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - appnet
     volumes:
       - ./data:/data
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_HOST_PORT}:${REDIS_CONT_PORT}"
   api:
     build:
       context: ./api/
       dockerfile: Dockerfile
-    links:
-      - redis
     ports:
-      - "${API_PORT}:5000"
+      - "${API_HOST_PORT}:${API_CONT_PORT}"
     networks:
       - appnet
     environment:
-      - REDIS_URL=redis://cache
-      - REDIS_PORT=${REDIS_PORT}
+      - AUTH_URL=auth:${AUTH_CONT_PORT}
+      - REDIS_URL=redis://
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 networks:
   appnet:
     driver: bridge

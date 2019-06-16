@@ -22,3 +22,6 @@
 
 #Redis data volume
 /data
+
+#Logging
+/auth_logs
