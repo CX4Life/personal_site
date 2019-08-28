@@ -105,33 +105,12 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("{\"username\":\"%s\"}", claims.Username)))
 }
 
-func openLogFile(logfile string) {
-	if logfile != "" {
-		lf, err := os.OpenFile(logfile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
-
-		if err != nil {
-			log.Fatal("OpenLogfile: os.OpenFile:", err)
-		}
-
-		log.SetOutput(lf)
-	}
-}
-
-func logRequest(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s %s %s\n", r.RemoteAddr, r.Method, r.URL, r.Body)
-		handler.ServeHTTP(w, r)
-	})
-}
-
 func main() {
 	logpath := os.Getenv("LOG_PATH")
-	openLogFile(logpath)
-
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	OpenLogFile(logpath)
 
 	http.HandleFunc("/issue", issueJwt)
 	http.HandleFunc("/verify", verifyJwt)
 
-	log.Fatal(http.ListenAndServe(":3001", logRequest(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(":3001", LogRequest(http.DefaultServeMux)))
 }
