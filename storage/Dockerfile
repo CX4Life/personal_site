@@ -5,7 +5,7 @@ RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-cer
 RUN adduser -D -g '' appuser
 
 WORKDIR $GOPATH/src/storage/azure_blob/
-COPY ./storage .
+COPY ./azure_blob .
 
 RUN go get -d -v
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /go/bin/azure_blob .

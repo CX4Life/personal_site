@@ -39,6 +39,7 @@ services:
       - appnet
     environment:
       - AUTH_URL=auth:${AUTH_CONT_PORT}
+      - STORAGE_URL=storage:${STORAGE_CONT_PORT}
   storage:
     build:
       context: ./storage/

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 var accountName string
@@ -18,15 +20,20 @@ var credentials *azblob.SharedKeyCredential
 
 // GetRequest defines the structure of GetBlob requests
 type GetRequest struct {
-	containerName string
-	blobName      string
+	ContainerName string `json:"containerName"`
+	BlobName      string `json:"blobName"`
+}
+
+// GetResponse defines the response to GetBlob requests
+type GetResponse struct {
+	Contents string `json:"contents"`
 }
 
 // SetRequest defines the structure of SetBlob requests
 type SetRequest struct {
-	containerName string
-	blobName      string
-	contents      []byte
+	ContainerName string `json:"containerName"`
+	BlobName      string `json:"blobName"`
+	Contents      string `json:"contents"`
 }
 
 // Borrowed from Azure example Go program, ignores if container already exists
@@ -65,20 +72,35 @@ func getBlob(w http.ResponseWriter, r *http.Request) {
 	handleError(err)
 
 	URL, _ := url.Parse(
-		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.containerName))
+		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.ContainerName))
 
 	containerURL := azblob.NewContainerURL(*URL, p)
-	blobURL := containerURL.NewBlockBlobURL(requestBody.blobName)
+	blobURL := containerURL.NewBlockBlobURL(requestBody.BlobName)
 	ctx := context.Background()
 	downloadResponse, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
-	handleError(err)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	bodyStream := downloadResponse.Body(azblob.RetryReaderOptions{MaxRetryRequests: 20})
 	downloadedData := bytes.Buffer{}
 	_, err = downloadedData.ReadFrom(bodyStream)
-	handleError(err)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	b64Content := base64.StdEncoding.EncodeToString(downloadedData.Bytes())
+	payload, err := json.Marshal(GetResponse{b64Content})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(downloadedData.Bytes())
+	w.Write(payload)
 }
 
 func setBlob(w http.ResponseWriter, r *http.Request) {
@@ -87,28 +109,33 @@ func setBlob(w http.ResponseWriter, r *http.Request) {
 		azblob.PipelineOptions{})
 
 	var requestBody SetRequest
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&requestBody)
-	handleError(err)
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	URL, _ := url.Parse(
-		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.containerName))
+		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.ContainerName))
 
 	containerURL := azblob.NewContainerURL(*URL, p)
-	ctx := context.Background() // This example uses a never-expiring context
+	ctx := context.Background()
 	_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
 	handleError(err)
 
-	blobURL := containerURL.NewBlockBlobURL(requestBody.blobName)
-	reader := bytes.NewReader(requestBody.contents)
+	blobURL := containerURL.NewBlockBlobURL(requestBody.BlobName)
+	reader := strings.NewReader(requestBody.Contents)
 	_, err = blobURL.Upload(ctx, reader, azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
-	handleError(err)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 }
 
 func main() {
-	logpath := os.Getenv("LOG_PATH")
+	logpath := os.Getenv("STORAGE_LOG_PATH")
 	OpenLogFile(logpath)
 
 	accountName = os.Getenv("AZURE_ACCOUNT_NAME")

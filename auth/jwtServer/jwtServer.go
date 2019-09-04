@@ -106,7 +106,7 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	logpath := os.Getenv("LOG_PATH")
+	logpath := os.Getenv("AUTH_LOG_PATH")
 	OpenLogFile(logpath)
 
 	http.HandleFunc("/issue", issueJwt)

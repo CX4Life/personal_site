@@ -1,6 +1,5 @@
 from flask import Flask, request, Response
 from functools import wraps
-import redis
 import requests
 import os
 import json
@@ -63,22 +62,6 @@ def get_post(postID):
         return Response("Not found", status=404)
 
     return Response(json.dumps(post), mimetype="application/json")
-
-
-@app.route("/check-p")
-@auth_token_required
-def check_persistence():
-    global data_access
-    json = data_access.get_kv("foo")
-    return Response(json, mimetype="application/json")
-
-
-@app.route("/redis-check")
-def check_redis():
-    global data_access
-    data_access.set_kv("foo", "bar")
-    json = data_access.get_kv("foo")
-    return Response(json, mimetype="application/json")
 
 
 if __name__ == "__main__":
