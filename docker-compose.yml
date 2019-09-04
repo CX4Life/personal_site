@@ -29,15 +29,6 @@ services:
       - "${AUTH_HOST_PORT}:${AUTH_CONT_PORT}"
     networks:
       - appnet
-  redis:
-    image: redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    networks:
-      - appnet
-    volumes:
-      - ./data:/data
-    ports:
-      - "${REDIS_HOST_PORT}:${REDIS_CONT_PORT}"
   api:
     build:
       context: ./api/
@@ -48,8 +39,18 @@ services:
       - appnet
     environment:
       - AUTH_URL=auth:${AUTH_CONT_PORT}
-      - REDIS_URL=redis://
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+  storage:
+    build:
+      context: ./storage/
+      dockerfile: Dockerfile
+    ports:
+      - "${STORAGE_HOST_PORT}:${STORAGE_CONT_PORT}"
+    networks:
+      - appnet
+    environment:
+      - AZURE_ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
+      - AZURE_STORAGE_KEY=${AZURE_STORAGE_KEY}
+      - LOG_PATH=${STORAGE_LOG_PATH}
 networks:
   appnet:
     driver: bridge

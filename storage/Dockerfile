@@ -18,5 +18,5 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /go/bin/azure_blob /go/bin/azure_blob
 
 USER appuser
-EXPOSE 3001
+EXPOSE 3003
 ENTRYPOINT ["/go/bin/azure_blob"]
