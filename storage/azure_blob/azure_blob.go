@@ -1,17 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
+	"time"
 )
 
 var accountName string
@@ -26,14 +25,7 @@ type GetRequest struct {
 
 // GetResponse defines the response to GetBlob requests
 type GetResponse struct {
-	Contents string `json:"contents"`
-}
-
-// SetRequest defines the structure of SetBlob requests
-type SetRequest struct {
-	ContainerName string `json:"containerName"`
-	BlobName      string `json:"blobName"`
-	Contents      string `json:"contents"`
+	SASToken string `json:"sasToken"`
 }
 
 // Borrowed from Azure example Go program, ignores if container already exists
@@ -62,45 +54,38 @@ func getCredentials() *azblob.SharedKeyCredential {
 }
 
 func getBlob(w http.ResponseWriter, r *http.Request) {
-	p := azblob.NewPipeline(
-		getCredentials(),
-		azblob.PipelineOptions{})
+	credentials := getCredentials()
 
 	var requestBody GetRequest
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&requestBody)
 	handleError(err)
 
-	URL, _ := url.Parse(
-		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.ContainerName))
+	sasQueryParams, err := azblob.BlobSASSignatureValues{
+		Protocol:      azblob.SASProtocolHTTPS,
+		ExpiryTime:    time.Now().UTC().Add(2 * time.Hour),
+		ContainerName: requestBody.ContainerName,
+		BlobName:      requestBody.BlobName,
+		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String(),
+	}.NewSASQueryParameters(credentials)
 
-	containerURL := azblob.NewContainerURL(*URL, p)
-	blobURL := containerURL.NewBlockBlobURL(requestBody.BlobName)
-	ctx := context.Background()
-	downloadResponse, err := blobURL.Download(ctx, 0, azblob.CountToEnd, azblob.BlobAccessConditions{}, false)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	bodyStream := downloadResponse.Body(azblob.RetryReaderOptions{MaxRetryRequests: 20})
-	downloadedData := bytes.Buffer{}
-	_, err = downloadedData.ReadFrom(bodyStream)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	b64Content := base64.StdEncoding.EncodeToString(downloadedData.Bytes())
-	payload, err := json.Marshal(GetResponse{b64Content})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	qp := sasQueryParams.Encode()
+	blobURLWithSASToken := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s?%s",
+		accountName, requestBody.ContainerName, requestBody.BlobName, qp)
+	payload, err := json.Marshal(GetResponse{SASToken: blobURLWithSASToken})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(payload)
+}
+
+func copyFile(r io.ReadSeeker, w io.WriteSeeker) error {
+	_, err := io.Copy(w, r)
+	return err
 }
 
 func setBlob(w http.ResponseWriter, r *http.Request) {
@@ -108,24 +93,43 @@ func setBlob(w http.ResponseWriter, r *http.Request) {
 		getCredentials(),
 		azblob.PipelineOptions{})
 
-	var requestBody SetRequest
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	r.ParseMultipartForm(10 << 20)
+	containerName := r.FormValue("containerName")
+
+	f, handler, err := r.FormFile("upload")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer f.Close()
+
+	tempfile, err := os.Create("tempfile")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer os.Remove("tempfile")
+
+	err = copyFile(f, tempfile)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	blobName := handler.Filename
 	URL, _ := url.Parse(
-		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, requestBody.ContainerName))
+		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, containerName))
 
 	containerURL := azblob.NewContainerURL(*URL, p)
 	ctx := context.Background()
 	_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
 	handleError(err)
 
-	blobURL := containerURL.NewBlockBlobURL(requestBody.BlobName)
-	reader := strings.NewReader(requestBody.Contents)
-	_, err = blobURL.Upload(ctx, reader, azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
+	blobURL := containerURL.NewBlockBlobURL(blobName)
+	_, err = azblob.UploadFileToBlockBlob(ctx, tempfile, blobURL, azblob.UploadToBlockBlobOptions{
+		BlockSize:   4 * 1024 * 1024,
+		Parallelism: 16})
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
