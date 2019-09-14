@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
@@ -16,17 +19,6 @@ import (
 var accountName string
 var accountKey string
 var credentials *azblob.SharedKeyCredential
-
-// GetRequest defines the structure of GetBlob requests
-type GetRequest struct {
-	ContainerName string `json:"containerName"`
-	BlobName      string `json:"blobName"`
-}
-
-// GetResponse defines the response to GetBlob requests
-type GetResponse struct {
-	SASToken string `json:"sasToken"`
-}
 
 // Borrowed from Azure example Go program, ignores if container already exists
 func handleError(err error) {
@@ -88,13 +80,136 @@ func copyFile(r io.ReadSeeker, w io.WriteSeeker) error {
 	return err
 }
 
-func setBlob(w http.ResponseWriter, r *http.Request) {
+func listBlobs(w http.ResponseWriter, r *http.Request) {
+	containerName := mux.Vars(r)["containerName"]
 	p := azblob.NewPipeline(
 		getCredentials(),
 		azblob.PipelineOptions{})
 
+	URL, _ := url.Parse(fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, containerName))
+	containerURL := azblob.NewContainerURL(*URL, p)
+
+	ctx := context.Background()
+	blobs, err := containerURL.ListBlobsFlatSegment(ctx, azblob.Marker{}, azblob.ListBlobsSegmentOptions{})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	blobNames := []string{}
+	for _, v := range blobs.Segment.BlobItems {
+		blobNames = append(blobNames, v.Name)
+	}
+
+	payload, err := json.Marshal(ListBlobResponse{Blobs: blobNames})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
+}
+
+func uploadBytesToStorage(w http.ResponseWriter, r *http.Request) {
+	p := azblob.NewPipeline(
+		getCredentials(),
+		azblob.PipelineOptions{})
+
+	containerName := mux.Vars(r)["containerName"]
+
+	var uploadRequest UploadBytesRequest
+	d := json.NewDecoder(r.Body)
+	err := d.Decode(&uploadRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	data, err := base64.StdEncoding.DecodeString(uploadRequest.Contents)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	URL, _ := url.Parse(
+		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, containerName))
+
+	ctx := context.Background()
+	containerURL := azblob.NewContainerURL(*URL, p)
+	blockBlobURL := containerURL.NewBlockBlobURL(uploadRequest.BlobName)
+	reader := bytes.NewReader(data)
+
+	_, err = blockBlobURL.Upload(ctx, reader, azblob.BlobHTTPHeaders{}, azblob.Metadata{}, azblob.BlobAccessConditions{})
+	if err != nil {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func listContainers(w http.ResponseWriter, r *http.Request) {
+	p := azblob.NewPipeline(
+		getCredentials(),
+		azblob.PipelineOptions{})
+
+	URL, _ := url.Parse(
+		fmt.Sprintf("https://%s.blob.core.windows.net/", accountName))
+
+	s := azblob.NewServiceURL(*URL, p)
+	ctx := context.Background()
+	containers, err := s.ListContainersSegment(ctx, azblob.Marker{}, azblob.ListContainersSegmentOptions{})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	containerNames := []string{}
+	for _, v := range containers.ContainerItems {
+		containerNames = append(containerNames, v.Name)
+	}
+
+	payload, err := json.Marshal(ListContainerResponse{Containers: containerNames})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(payload)
+}
+
+func createContainer(w http.ResponseWriter, r *http.Request) {
+	p := azblob.NewPipeline(
+		getCredentials(),
+		azblob.PipelineOptions{})
+
+	var request CreateContainerRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	URL, _ := url.Parse(
+		fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, request.ContainerName))
+
+	containerURL := azblob.NewContainerURL(*URL, p)
+	ctx := context.Background()
+	_, err = containerURL.Create(ctx, azblob.Metadata{}, azblob.PublicAccessNone)
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func uploadFileToStorage(w http.ResponseWriter, r *http.Request) {
+	p := azblob.NewPipeline(
+		getCredentials(),
+		azblob.PipelineOptions{})
+
+	containerName := mux.Vars(r)["containerName"]
 	r.ParseMultipartForm(10 << 20)
-	containerName := r.FormValue("containerName")
 
 	f, handler, err := r.FormFile("upload")
 	if err != nil {
@@ -149,8 +264,28 @@ func main() {
 		log.Fatalln("Azure account name or storage key not provided. Exiting.")
 	}
 
-	http.HandleFunc("/get", getBlob)
-	http.HandleFunc("/set", setBlob)
+	r := mux.NewRouter()
 
-	log.Fatal(http.ListenAndServe(":3003", LogRequest(http.DefaultServeMux)))
+	r.HandleFunc("/container", listContainers).
+		Methods("GET")
+	r.HandleFunc("/container", createContainer).
+		Methods("POST")
+	r.HandleFunc("/container/{containerName}/blob", listBlobs).
+		Methods("GET")
+	r.HandleFunc("/container/{containerName}/blob", uploadFileToStorage).
+		Methods("POST").
+		Headers("Content-Type", "application/x-www-form-urlencoded")
+	r.HandleFunc("/conatiner/{containerName}/blob", uploadBytesToStorage).
+		Methods("POST").
+		Headers("Content-Type", "application/json")
+	r.HandleFunc("/container/{containerName}/blob/{blobName}", getBlob).
+		Methods("GET")
+
+	srv := &http.Server{
+		Handler:      LogRequest(r),
+		Addr:         "127.0.0.1:3003",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
