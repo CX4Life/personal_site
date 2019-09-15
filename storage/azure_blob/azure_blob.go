@@ -47,17 +47,13 @@ func getCredentials() *azblob.SharedKeyCredential {
 
 func getBlob(w http.ResponseWriter, r *http.Request) {
 	credentials := getCredentials()
-
-	var requestBody GetRequest
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&requestBody)
-	handleError(err)
+	vars := mux.Vars(r)
 
 	sasQueryParams, err := azblob.BlobSASSignatureValues{
 		Protocol:      azblob.SASProtocolHTTPS,
 		ExpiryTime:    time.Now().UTC().Add(2 * time.Hour),
-		ContainerName: requestBody.ContainerName,
-		BlobName:      requestBody.BlobName,
+		ContainerName: vars["containerName"],
+		BlobName:      vars["blobName"],
 		Permissions:   azblob.BlobSASPermissions{Add: false, Read: true, Write: false}.String(),
 	}.NewSASQueryParameters(credentials)
 
@@ -68,7 +64,7 @@ func getBlob(w http.ResponseWriter, r *http.Request) {
 
 	qp := sasQueryParams.Encode()
 	blobURLWithSASToken := fmt.Sprintf("https://%s.blob.core.windows.net/%s/%s?%s",
-		accountName, requestBody.ContainerName, requestBody.BlobName, qp)
+		accountName, vars["containerName"], vars["blobName"], qp)
 	payload, err := json.Marshal(GetResponse{SASToken: blobURLWithSASToken})
 
 	w.Header().Set("Content-Type", "application/json")
@@ -281,11 +277,5 @@ func main() {
 	r.HandleFunc("/container/{containerName}/blob/{blobName}", getBlob).
 		Methods("GET")
 
-	srv := &http.Server{
-		Handler:      LogRequest(r),
-		Addr:         "127.0.0.1:3003",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(http.ListenAndServe(":3003", LogRequest(r)))
 }

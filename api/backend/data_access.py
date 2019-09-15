@@ -8,18 +8,22 @@ _post_id_counter = "NEXT_POST_ID"
 
 class DataAccess:
     def __init__(self):
-        self._storageAPI = 'storage'
+        self._base_url = 'http://{}'.format(os.environ['STORAGE_URL'])
 
     def get_posts(self):
-        foo = requests.post('http://{}/get'.format(os.environ['STORAGE_URL']), json={
-            'containerName': 'test-container',
-            'blobName': 'postman-1'})
-        print(foo.content)
-        return {'success': True}
+        postsURL = '{}/container/posts/blob'.format(self._base_url)
 
-    # def get_post(self, id):
-    #     ret = self._redis.hget(_posts_list_name, id)
-    #     return json.loads(ret)
+        r = requests.get(postsURL)
+        listOfBlobs = json.loads(r.content)['blobs']
+        return json.dumps(listOfBlobs)
+
+    def get_post(self, postName):
+        postURL = '{}/container/posts/blob/{}'.format(self._base_url, postName)
+        r = requests.get(postURL)
+
+        sasToken = r.content
+        r = requests.get(sasToken)
+        return r.content
 
     # def add_post(self, post):
     #     id = self._redis.incr(_post_id_counter, 1)

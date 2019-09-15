@@ -1,3 +1,4 @@
+from waitress import serve
 from flask import Flask, request, Response
 from functools import wraps
 import requests
@@ -11,11 +12,14 @@ data_access = DataAccess()
 
 
 def auth_token_valid(token):
-    verify_url = "http://{}/verify".format(os.environ["AUTH_URL"])
-    r = requests.post(verify_url, json={"token": token})
-    body = json.loads(r.content)
-    return r.status_code == 200 and body["username"] is not None
-
+    try:
+        verify_url = "http://{}/verify".format(os.environ["AUTH_URL"])
+        r = requests.post(verify_url, json={"token": token})
+        print(r.content)
+        body = json.loads(r.content)
+        return r.status_code == 200 and body["username"] is not None
+    except:
+        return False
 
 def auth_token_required(f):
     @wraps(f)
@@ -53,11 +57,11 @@ def get_or_post_posts():
         return Response(status=400)
 
 
-@app.route("/posts/<int:postID>")
+@app.route("/posts/<postName>")
 @auth_token_required
-def get_post(postID):
+def get_post(postName):
     global data_access
-    post = data_access.get_post(postID)
+    post = data_access.get_post(postName)
     if post is None:
         return Response("Not found", status=404)
 
@@ -65,4 +69,4 @@ def get_post(postID):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    serve(app, host="0.0.0.0", port=5000)
