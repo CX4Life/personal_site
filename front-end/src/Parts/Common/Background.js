@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const StyledBackground = styled.div`
     position: relative;
-    top: 4.0rem;
+    top: 1.0rem;
     background-image: url("/background.jpg");
     background-size: 100vw;
     background-color: #042A3C;
@@ -15,13 +15,15 @@ const StyledBackground = styled.div`
 
 const Content = styled.div`
     font-family: 'PT Sans';
-    height: -webkit-fill-available;
+    position: relative;
+    top: 6.0rem;
     padding-top: 2.0rem;
-    margin-left: 100px;
-    margin-right: 100px;
-    padding-left: 60px;
-    padding-right: 60px;
-    background-color: rgba(255, 255, 255, 0.8);
+    margin-left: 80px;
+    margin-right: 80px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 3.0rem;
+    background-color: rgba(34, 34, 34, 0.7);
 `;
 
 export const Background = ({ content }) => (
