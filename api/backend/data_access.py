@@ -21,7 +21,7 @@ class DataAccess:
         postURL = '{}/container/posts/blob/{}'.format(self._base_url, postName)
         r = requests.get(postURL)
 
-        sasToken = r.content
+        sasToken = json.loads(r.content)['sasToken']
         r = requests.get(sasToken)
         return r.content
 
