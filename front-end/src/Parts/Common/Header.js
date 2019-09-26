@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Github, LinkedIn } from '../../Icons';
 
 const LIVING_CORAL = '#FC267A';
 
@@ -38,22 +39,22 @@ const LastName = styled.span`
     margin-left: 0.8rem;
     letter-spacing: 0.3rem;
     font-family: 'Open Sans';
-
-`
+`;
 
 const StyledLinks = styled.div`
-    font-family: 'Source Sans Pro';
-    font-size: 16px;
     display: flex;
     width: 60%;
     margin-right: 8vw;
     justify-content: flex-end;
 `;
 
-const Link = styled.a`
+const IconLink = styled.div`
     text-decoration: none;
-    color: #2ADAD5;
+    fill: #2ADAD5;
     padding: 0.5em;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
 `;
 
 const TitleName = () => (
@@ -63,13 +64,26 @@ const TitleName = () => (
     </Title>
 );
 
-const Links = ({ links }) => (
-    <StyledLinks>
-        {links.map(
-            link => <Link key={`${link.name}-link`} href={link.href}>{link.name}</Link>
-        )}
-    </StyledLinks>
-);
+const Links = ({ links }) => {
+    const iconMap = {
+        'GitHub': <Github />,
+        'LinkedIn': <LinkedIn />
+    };
+
+    return (
+        <StyledLinks>
+            {links.map(
+                link => (
+                    <IconLink
+                        key={`${link.name}-link`}
+                        onClick={() => window.location.href = link.href}
+                    >
+                        {iconMap[link.name]}
+                    </IconLink>
+                ))}
+        </StyledLinks>
+    );
+};
 
 export const Header = () => {
     const socialLinks = [
