@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const FixedHeader = styled.div`
     z-index: 10003;
     width: 100%;
-    height: 10vh;
+    height: 70px;
     background-color: #222;
     display: flex;
     position: fixed;

@@ -4,7 +4,10 @@ import AnimateHeight from 'react-animate-height';
 
 const Header = ({ content, onClick }) => {
     const HeaderWrapper = styled.div`
-        background: gray
+        font-size: 24px;
+        font-weight: bold;
+        font-family: 'PT Sans';
+        letter-spacing: 0.3rem;
     `;
 
     return <HeaderWrapper onClick={onClick}>
