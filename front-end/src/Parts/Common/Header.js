@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+const LIVING_CORAL = '#FC267A';
+
 const FixedHeader = styled.div`
     z-index: 10003;
     width: 100%;
@@ -11,37 +13,40 @@ const FixedHeader = styled.div`
     top: 0;
     flex-direction: row;
     align-items: center;
-    font-family: 'Source Sans Pro', sans-serif;
 `;
 
 const Title = styled.div`
     margin: 0.3em;
-    margin-left: 120px;
-    padding-right: 30px;
+    margin-left: 10vw;
+    padding-right: 2vm;
     width: 40%;
     min-width: 180px;
 `;
 
 const FirstName = styled.span`
-    font-weight: bolder;
+    font-weight: 800;
     font-size: 30px;
-    color: #FC267A;
-    letter-spacing: 0.3rem;
+    color: ${LIVING_CORAL};
+    letter-spacing: 0.2rem;
+    font-family: 'Open Sans';
 `;
 
 const LastName = styled.span`
-    font-weight: normal;
+    font-weight: 400;
     font-size: 30px;
-    color: #CA0038;
+    color: ${LIVING_CORAL};
     margin-left: 0.8rem;
-    letter-spacing: 0.2rem;
+    letter-spacing: 0.3rem;
+    font-family: 'Open Sans';
+
 `
 
 const StyledLinks = styled.div`
+    font-family: 'Source Sans Pro';
     font-size: 16px;
     display: flex;
     width: 60%;
-    margin-right: 120px;
+    margin-right: 8vw;
     justify-content: flex-end;
 `;
 

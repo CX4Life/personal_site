@@ -54,9 +54,9 @@ const SecondPane = () => (
         <div style={{
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: 'white',
-            paddingLeft: '120px',
-            paddingRight: '120px'
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            paddingLeft: '10vw',
+            paddingRight: '10vw'
         }}>
             <SubTitle>About Me</SubTitle>
             <Bar />
