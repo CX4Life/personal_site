@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header, Welcome } from '../Parts';
 
-export const About = () => (
+export const Blog = () => (
     <div className='app>'>
         <Header />
         <Welcome />

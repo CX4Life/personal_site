@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Header, Background, Expanding, Page, } from '../Parts';
+import { Header, Background, Page, } from '../Parts';
 
 const Centered = styled.div`
     color: white;
