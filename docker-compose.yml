@@ -39,19 +39,6 @@ services:
       - appnet
     environment:
       - AUTH_URL=auth:${AUTH_CONT_PORT}
-      - STORAGE_URL=storage:${STORAGE_CONT_PORT}
-  storage:
-    build:
-      context: ./storage/
-      dockerfile: Dockerfile
-    ports:
-      - "${STORAGE_HOST_PORT}:${STORAGE_CONT_PORT}"
-    networks:
-      - appnet
-    environment:
-      - AZURE_ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
-      - AZURE_STORAGE_KEY=${AZURE_STORAGE_KEY}
-      - LOG_PATH=${STORAGE_LOG_PATH}
 networks:
   appnet:
     driver: bridge
