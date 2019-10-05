@@ -8,7 +8,7 @@ _post_id_counter = "NEXT_POST_ID"
 
 class DataAccess:
     def __init__(self):
-        self._base_url = 'http://{}'.format(os.environ['STORAGE_URL'])
+        self._storage_account_name = os.environ['AZURE_ACCOUNT_NAME']
 
     def get_posts(self):
         postsURL = '{}/container/posts/blob'.format(self._base_url)

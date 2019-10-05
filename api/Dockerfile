@@ -1,16 +1,14 @@
 FROM ubuntu:16.04
 
-RUN apt-get update -y && \
-    apt-get install -y python-pip python-dev
+LABEL maintainer="Tim Woods tim.woods.tw@gmail.com"
+RUN apt-get update
+RUN apt-get install -y python3 python3-dev python3-pip nginx
 
-COPY ./requirements.txt /app/requirements.txt
+COPY ./ /app
 WORKDIR /app
-
-RUN pip install -r requirements.txt
-
-COPY . /app
+RUN pip3 install -r requirements.txt
 
 EXPOSE 5000
 
-ENTRYPOINT [ "python" ]
+ENTRYPOINT [ "python3" ]
 CMD [ "routes.py" ]

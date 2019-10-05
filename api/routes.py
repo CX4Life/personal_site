@@ -68,5 +68,10 @@ def get_post(postName):
     return Response(json.dumps(post), mimetype="application/json")
 
 
+@app.route("/ping")
+def ping():
+    return Response(json.dumps({'party': 'hard'}), mimetype="application/json")
+
+
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)

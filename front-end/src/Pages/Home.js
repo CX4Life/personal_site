@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Header, Background, Page, } from '../Parts';
+import { Header, ImageURLs, Background, Page, } from '../Parts';
 
 const Centered = styled.div`
     color: white;
@@ -39,7 +39,7 @@ const Text = styled.div`
 `;
 
 const FirstPane = () => (
-    <Background image='bg1.jpg'>
+    <Background image={ImageURLs.bg1}>
         <Centered>
             <div />
             <div />
@@ -50,7 +50,7 @@ const FirstPane = () => (
 );
 
 const SecondPane = () => (
-    <Background image='bg2.jpg'>
+    <Background image={ImageURLs.bg2}>
         <div style={{
             display: 'flex',
             flexDirection: 'column',
