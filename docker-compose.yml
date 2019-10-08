@@ -40,6 +40,7 @@ services:
     environment:
       - AUTH_URL=auth:${AUTH_CONT_PORT}
       - AZURE_ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
+      - AZURE_STORAGE_KEY=${AZURE_STORAGE_KEY}
 networks:
   appnet:
     driver: bridge

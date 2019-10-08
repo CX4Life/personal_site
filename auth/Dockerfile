@@ -1,5 +1,7 @@
 
-FROM golang:alpine as builder
+FROM golang:1.13.1-alpine3.10 as builder
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
 
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 RUN adduser -D -g '' appuser

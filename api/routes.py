@@ -15,17 +15,17 @@ def auth_token_valid(token):
     try:
         verify_url = "http://{}/verify".format(os.environ["AUTH_URL"])
         r = requests.post(verify_url, json={"token": token})
-        print(r.content)
-        body = json.loads(r.content)
-        return r.status_code == 200 and body["username"] is not None
+        return {"content": r.json, "status": r.status_code}
     except:
         return False
+
 
 def auth_token_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         auth_token = request.headers.get("Authorization")
-        if not auth_token_valid(auth_token):
+        valid = auth_token_valid(auth_token)
+        if valid["status"] != 200:
             return Response("Unauthorized", status=401)
         else:
             return f(*args, **kwargs)
@@ -33,32 +33,40 @@ def auth_token_required(f):
     return wrapper
 
 
-def load_posts():
-    global data_access
-
-
 def check_post_structure(post_body):
-    post_keys = ["title", "created_on", "body"]
+    post_keys = ["title", "created_on", "contents"]
     in_post_body = map(lambda key: key in post_body.keys(), post_keys)
     return all(in_post_body)
 
 
-@app.route("/posts", methods=["GET", "POST"])
+@app.route("/posts", methods=["POST"])
 @auth_token_required
-def get_or_post_posts():
+def create_post():
     global data_access
-    if request.method == "GET":
-        return Response(data_access.get_posts(), mimetype="application/json")
-    elif request.is_json and check_post_structure(request.json):
-        return Response(
-            data_access.add_post(request.json), mimetype="application/json", status=201
-        )
+    if request.is_json:
+        body = request.json
     else:
-        return Response(status=400)
+        f = request.files.get("file")
+        keys = request.form.to_dict()
+        body = {
+            "contents": f.read().decode("utf-8"),
+            "created_on": keys["created_on"],
+            "title": keys["title"],
+        }
+
+    if not check_post_structure(body):
+        return Response("Expecting contents, title and created_on", status=400)
+
+    return Response(data_access.add_post(body), status=201)
+
+
+@app.route("/posts", methods=["GET"])
+def get_posts():
+    global data_access
+    return Response(data_access.get_posts(), mimetype="application/json")
 
 
 @app.route("/posts/<postName>")
-@auth_token_required
 def get_post(postName):
     global data_access
     post = data_access.get_post(postName)
@@ -69,8 +77,9 @@ def get_post(postName):
 
 
 @app.route("/ping")
+@auth_token_required
 def ping():
-    return Response(json.dumps({'party': 'hard'}), mimetype="application/json")
+    return Response(json.dumps({"party": "hard"}), mimetype="application/json")
 
 
 if __name__ == "__main__":
