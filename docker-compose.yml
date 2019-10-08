@@ -8,8 +8,10 @@ services:
       - ./front-end/:/usr/app
       - /usr/app/node_modules
     environment:
-      - MONGO_DB_USER=${DB_USER}
-      - MONDO_DB_PASSWORD=${DB_PASSWORD}
+      - APP_USER=${APP_USER}
+      - APP_KEY=${APP_KEY}
+      - API_URL=api:${API_CONT_PORT}
+      - AUTH_URL=auth:${AUTH_CONT_PORT}
     ports:
       - "${APP_HOST_PORT}:${APP_CONT_PORT}"
     networks:

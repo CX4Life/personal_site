@@ -57,13 +57,27 @@ def create_post():
     if not check_post_structure(body):
         return Response("Expecting contents, title and created_on", status=400)
 
-    return Response(data_access.add_post(body), status=201)
+    return Response(
+        data_access.add_post(body),
+        status=201,
+        headers={"Access-Control-Allow-Origin": "localhost"},
+    )
 
 
-@app.route("/posts", methods=["GET"])
+@app.route("/posts", methods=["GET", "OPTIONS"])
 def get_posts():
     global data_access
-    return Response(data_access.get_posts(), mimetype="application/json")
+
+    if request.method == "OPTIONS":
+        return Response(
+            status=200, headers={"Access-Control-Allow-Origin": "localhost"}
+        )
+
+    return Response(
+        data_access.get_posts(),
+        mimetype="application/json",
+        headers={"Access-Control-Allow-Origin": "localhost"},
+    )
 
 
 @app.route("/posts/<postName>")
@@ -73,7 +87,11 @@ def get_post(postName):
     if post is None:
         return Response("Not found", status=404)
 
-    return Response(json.dumps(post), mimetype="application/json")
+    return Response(
+        json.dumps(post),
+        mimetype="application/json",
+        headers={"Access-Control-Allow-Origin": "localhost"},
+    )
 
 
 @app.route("/ping")

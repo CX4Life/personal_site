@@ -3,7 +3,7 @@ import { Background } from './Common/Background';
 import { Page } from './Common/Page';
 import { Card, SHADOW_TYPES, CARD_PADDING } from './Card'
 import ImageURLs from './Common/ImageURLs';
-import Posts from './Posts';
+import Post from './Post';
 import Welcome from './Welcome'
 import Expanding from './Expanding';
 
@@ -15,7 +15,7 @@ export {
     Header,
     ImageURLs,
     Page,
-    Posts,
+    Post,
     SHADOW_TYPES,
     Welcome,
 };

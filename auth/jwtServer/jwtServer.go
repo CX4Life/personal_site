@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -32,6 +33,14 @@ type TokenJSON struct {
 }
 
 func issueJwt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 
@@ -72,6 +81,14 @@ func issueJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func verifyJwt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	var tokenStruct TokenJSON
 	err := json.NewDecoder(r.Body).Decode(&tokenStruct)
 	if err != nil {
@@ -106,11 +123,12 @@ func verifyJwt(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	router := mux.NewRouter()
 	logpath := os.Getenv("AUTH_LOG_PATH")
 	OpenLogFile(logpath)
 
-	http.HandleFunc("/issue", issueJwt)
-	http.HandleFunc("/verify", verifyJwt)
+	router.HandleFunc("/issue", issueJwt).Methods("POST", "OPTIONS")
+	router.HandleFunc("/verify", verifyJwt).Methods("POST", "OPTIONS")
 
-	log.Fatal(http.ListenAndServe(":3001", LogRequest(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(":3001", LogRequest(router)))
 }
