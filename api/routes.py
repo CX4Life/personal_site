@@ -1,5 +1,6 @@
 from waitress import serve
 from flask import Flask, request, Response
+from flask_cors import CORS
 from functools import wraps
 import requests
 import os
@@ -8,6 +9,7 @@ import json
 from backend.data_access import DataAccess
 
 app = Flask(__name__)
+CORS(app)
 data_access = DataAccess()
 
 
@@ -39,9 +41,7 @@ def check_post_structure(post_body):
     return all(in_post_body)
 
 
-@app.route("/posts", methods=["POST"])
-@auth_token_required
-def create_post():
+def handle_create_post(request):
     global data_access
     if request.is_json:
         body = request.json
@@ -57,27 +57,20 @@ def create_post():
     if not check_post_structure(body):
         return Response("Expecting contents, title and created_on", status=400)
 
-    return Response(
-        data_access.add_post(body),
-        status=201,
-        headers={"Access-Control-Allow-Origin": "localhost"},
-    )
+    return Response(data_access.add_post(body), status=201)
 
 
-@app.route("/posts", methods=["GET", "OPTIONS"])
+@app.route("/posts", methods=["GET", "POST", "OPTIONS"])
 def get_posts():
     global data_access
 
     if request.method == "OPTIONS":
-        return Response(
-            status=200, headers={"Access-Control-Allow-Origin": "localhost"}
-        )
+        return Response(status=200)
 
-    return Response(
-        data_access.get_posts(),
-        mimetype="application/json",
-        headers={"Access-Control-Allow-Origin": "localhost"},
-    )
+    if request.method == "POST":
+        return handle_create_post(request)
+
+    return Response(data_access.get_posts(), mimetype="application/json")
 
 
 @app.route("/posts/<postName>")
@@ -87,11 +80,7 @@ def get_post(postName):
     if post is None:
         return Response("Not found", status=404)
 
-    return Response(
-        json.dumps(post),
-        mimetype="application/json",
-        headers={"Access-Control-Allow-Origin": "localhost"},
-    )
+    return Response(json.dumps(post), mimetype="application/json")
 
 
 @app.route("/ping")
