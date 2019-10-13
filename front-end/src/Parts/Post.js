@@ -23,6 +23,8 @@ const PostHeader = styled.div`
 
 const PostTitle = styled.span`
     font-size: xx-large;
+    font-variant: all-small-caps;
+    font-family: 'Open Sans', sans-serif;
     border-bottom: white;
     border-bottom-style: solid;
     border-width: 2px;

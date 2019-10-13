@@ -14,6 +14,8 @@ const Centered = styled.div`
 
 const Title = styled.h1`
     font-family: 'PT Sans', sans-serif;
+    flex-grow: 1;
+    flex-basis: 1rem;
     font-size: 60px;
     letter-spacing: 0.15rem;
 `;
@@ -33,6 +35,7 @@ const Bar = styled.span`
 
 const Offset = styled.div`
     flex-grow: 3;
+    flex-basis: 1rem;
 `;
 
 const Text = styled.div`
