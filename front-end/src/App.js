@@ -54,8 +54,7 @@ export default class App extends Component {
       <Router>
         <div className="App">
           <Route exact path='/' component={Home} />
-          <Route path='/blog' component={() => (
-            <Blog api={api} />)} />
+          <Route path='/blog' component={() => <Blog api={api} />} />
         </div>
       </Router>
     );

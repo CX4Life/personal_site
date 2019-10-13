@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Header, ImageURLs, Background, Page, } from '../Parts';
+import { Header, ImageURLs, Background, Page, OneColumn } from '../Parts';
+
 
 const Centered = styled.div`
     color: white;
@@ -30,9 +31,14 @@ const Bar = styled.span`
     border-color: #333
 `;
 
+const Offset = styled.div`
+    flex-grow: 3;
+`;
+
 const Text = styled.div`
     padding-top: 1rem;
     padding-bottom: 2rem;
+    flex-grow: 1;
     font-size: 14px;
     font-family: 'Open Sans';
     color: #222;
@@ -41,9 +47,7 @@ const Text = styled.div`
 const FirstPane = () => (
     <Background image={ImageURLs.bg1}>
         <Centered>
-            <div />
-            <div />
-            <div />
+            <Offset />
             <Title>Hi, I'm Tim</Title>
         </Centered>
     </Background>
@@ -51,13 +55,7 @@ const FirstPane = () => (
 
 const SecondPane = () => (
     <Background image={ImageURLs.bg2}>
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
-            paddingLeft: '10vw',
-            paddingRight: '10vw'
-        }}>
+        <OneColumn>
             <SubTitle>About Me</SubTitle>
             <Bar />
             <Text>
@@ -66,28 +64,18 @@ const SecondPane = () => (
                     I write PHP, Node, C#, SQL and React at work. I've made and maintained
                     internal and public REST APIs, event-driven microservices in Azure,
                     complex UIs with React and Redux, and all the goo in-between.
-                </p>
+                    </p>
                 <p>
                     I enjoy learning with my colleagues as we modernize our SaaS webiste, and
                     by playing with technology in personal projects, like this site.
-                </p>
+                    </p>
                 <p>
                     I'm excited to share my thoughts here as I continue learn more about
                     Software Development.
-                </p>
+                    </p>
             </Text>
-        </div>
+        </OneColumn>
     </Background >
-);
-
-const ThirdPane = () => (
-    <Background image='bg3.jpg'>
-        <div style={{
-            backgroundColor: 'white',
-            width: '100%'
-        }}>
-        </div>
-    </Background>
 );
 
 export const Home = () => (
@@ -95,6 +83,5 @@ export const Home = () => (
         <Header />
         <FirstPane />
         <SecondPane />
-        {/* <ThirdPane /> */}
     </Page>
 );

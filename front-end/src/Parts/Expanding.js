@@ -1,18 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
 import AnimateHeight from 'react-animate-height';
 
 const Header = ({ content, onClick }) => {
-    const HeaderWrapper = styled.div`
-        font-size: 24px;
-        font-weight: bold;
-        font-family: 'PT Sans';
-        letter-spacing: 0.3rem;
-    `;
-
-    return <HeaderWrapper onClick={onClick}>
+    return <div onClick={onClick}>
         {content}
-    </HeaderWrapper>
+    </div>
 };
 
 const Children = ({ content, height }) => (
