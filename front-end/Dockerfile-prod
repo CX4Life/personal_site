@@ -9,8 +9,8 @@ COPY . /app
 RUN npm run build
 
 # production environment
-FROM nginx:1.16.0-alpine
-COPY --from=build /app/build /usr/share/nginx/html
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM mhart/alpine-node
+RUN yarn global add serve
+WORKDIR /app
+COPY --from=build /app/build .
+CMD ["serve", "-p", "80", "-s", "."]
