@@ -11,40 +11,19 @@ export default class App extends Component {
 
     this.state = {
       api: null,
-      auth: null
     };
   }
 
   componentDidMount() {
-    const auth = Axios.create({
-      baseURL: Constants.AUTH_URL,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const app_user = Constants.APP_USER;
-    const app_key = Constants.APP_KEY;
-
-    let auth_token;
-
-    auth.post('/issue', {
-      username: app_user,
-      password: app_key
-    }).then(response => {
-      auth_token = response.data.token;
-    });
-
     const api = Axios.create({
       baseURL: Constants.API_URL,
       headers: {
-        Authorization: auth_token
+        Authorization: Constants.APP_JWT
       }
     });
 
     this.setState({
-      api,
-      auth
+      api
     });
   }
 
