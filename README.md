@@ -7,7 +7,9 @@ Copyright (c) Tim Woods - 2019
 It's hosted on a Digital Ocean droplet running Linux. Content is served by NGINX reverse
 proxy, which forwards traffic to several Docker containers running on the droplet.
 
-To run the site locally, Docker and an Azure Storage account are required, then:
+To run the site locally, Docker and an Azure Storage account (or the
+[Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator)
+) are required, then:
 
 1- Clone this repository.
 2- In the root of the directory, an `.env` file must be included, which specifies all of
