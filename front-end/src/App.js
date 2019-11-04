@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Axios from 'axios';
-import { Home, Blog } from './Pages'
+import { Home, Blog, ServiceWorkerDemo } from './Pages'
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Constants from './lib/Constants';
 import './App.css';
@@ -34,6 +34,7 @@ export default class App extends Component {
         <div className="App">
           <Route exact path='/' component={Home} />
           <Route path='/blog' component={() => <Blog api={api} />} />
+          <Route path='/serviceWorker' component={() => <ServiceWorkerDemo api={api} />} />
         </div>
       </Router>
     );

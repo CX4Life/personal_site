@@ -30,7 +30,7 @@ export class Blog extends React.Component {
         this.props.api.get('/posts')
             .then(({ data }) => {
                 this.setState({
-                    posts: data
+                    posts: data.sort((a, b) => new Date(a.created_on) - new Date(b.created_on))
                 });
             });
     }

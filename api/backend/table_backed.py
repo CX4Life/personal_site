@@ -5,7 +5,7 @@ class TableBacked:
     def __init__(self, table_name, table_service):
         self.table_name = table_name
         self._service = table_service
-        self._partition_filter = "PartitionKey eq '{}'".format
+        self._partition_filter = "PartitionKey eq {}".format
         self._next_row_key_by_partition = {}
 
     @staticmethod
