@@ -1,21 +1,28 @@
 # personal_site
-My personal website!
+
+Tim Woods personal website
 
 Copyright (c) Tim Woods - 2019
 
-This is all the code that supports my personal website.
+It's hosted on a Digital Ocean droplet running Linux. Content is served by NGINX reverse
+proxy, which forwards traffic to several Docker containers running on the droplet.
 
-It breaks services into Docker containers, which are orchestrated using `docker-compose`.
+To run the site locally, Docker and an Azure Storage account (or the
+[Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator)
+) are required, then:
 
-Originally, I was hoping to use Google Cloud Platform's Kubernetes Engine to host this
-site, but in reality, that's overkill even for me.
+1- Clone this repository.
+2- In the root of the directory, an `.env` file must be included, which specifies all of
+the environment variables that appear in the `docker-compose.yml` file. This includes
+the name and access key for the Azure Storage account as is visible in the `api`
+section of the compose file.
+3- With the `.env` file in place, run:
 
-It's hosted on a Digital Ocean droplet running Linux. Content is served by NGINX, and
-the NGINX configuration file can be found in this repo.
+```sh
+    docker-compose build
+    docker-compose up
+```
 
-The site is "deployed" by ssh'ing to my Droplet, and running `docker-compose up`.
-That makes me happy.
-
-Currently, the front-end is React, and a Mongo database is being added to save posts to the site.
-
-License is MIT
+4- The front-end, API and auth servers will now be running locally, and can be accessed
+by sending HTTP traffic to `localhost:<container port>`, where `<container port>` is the
+port specified in the `.env` file for each service.
