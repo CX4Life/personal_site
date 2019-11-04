@@ -5,12 +5,11 @@ class TableBacked:
     def __init__(self, table_name, table_service):
         self.table_name = table_name
         self._service = table_service
-        self._partition_filter = "PartitionKey eq {}".format
         self._next_row_key_by_partition = {}
 
     @staticmethod
-    def _partiton_filter(partition):
-        return "PartitionKey eq '{}'".format(partition)
+    def _partition_filter(partition):
+        return "PartitionKey eq {}".format(partition)
 
     @staticmethod
     def _pad_row_key(rowkey):
