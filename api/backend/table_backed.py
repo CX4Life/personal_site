@@ -26,6 +26,10 @@ class TableBacked:
     def _pad_row_key(rowkey):
         return str(rowkey).zfill(6)
 
+    @staticmethod
+    def _partition_filter(partition):
+        return "PartitionKey eq '{}'".format(partition)
+
     def _get_next_row_id(self, partition):
         if partition in self._next_row_key_by_partition:
             key = self._next_row_key_by_partition[partition]
@@ -65,6 +69,6 @@ class TableBacked:
         )
         return {
             "partition": partition,
-            "key": self._next_row_key_by_partition[partition] - 1,
+            "key": self._next_row_key_by_partition[partition],
         }
 
