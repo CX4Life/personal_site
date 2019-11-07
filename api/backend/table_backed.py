@@ -5,11 +5,22 @@ class TableBacked:
     def __init__(self, table_name, table_service):
         self.table_name = table_name
         self._service = table_service
-        self._next_row_key_by_partition = {}
+        self._next_row_key_by_partition = self._create_row_key_lookup()
 
-    @staticmethod
-    def _partition_filter(partition):
-        return "PartitionKey eq {}".format(partition)
+    def _create_row_key_lookup(self):
+        lookup = {}
+        rows = self._service.query_entities(
+            self.table_name, select="PartitionKey, RowKey"
+        )
+
+        for row in rows:
+            part = row["PartitionKey"]
+            rowKey = int(row["RowKey"])
+            if part in lookup:
+                lookup[part] = max(lookup[part], rowKey)
+            else:
+                lookup[part] = rowKey
+        return lookup
 
     @staticmethod
     def _pad_row_key(rowkey):
@@ -19,18 +30,16 @@ class TableBacked:
         if partition in self._next_row_key_by_partition:
             key = self._next_row_key_by_partition[partition]
             self._next_row_key_by_partition[partition] += 1
-            return key
+            return key + 1
         else:
             rows = self._service.query_entities(
-                self.table_name,
-                filter=self._partition_filter(partition),
-                select="RowKey",
+                self.table_name, select="PartitionKey, RowKey"
             )
             max_key = 1
             for row in rows:
-                max_key = max(max_key, int(row.RowKey))
-            self._next_row_key_by_partition[partition] = max_key + 1
-            return max_key
+                max_key = max(max_key, int(row["RowKey"]))
+            self._next_row_key_by_partition[partition] = max_key
+            return max_key + 1
 
     def _dict_to_entity(self, partition, dict):
         dict["PartitionKey"] = partition
