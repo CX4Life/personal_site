@@ -62,20 +62,16 @@ const SecondPane = () => (
             <SubTitle>About Me</SubTitle>
             <Bar />
             <Text>
-                <p>I'm a full-stack Software Engineer in Bellingham, Washington.</p>
+                <p>I'm a full-stack Software Engineer in Seattle.</p>
                 <p>
-                    I write PHP, Node, C#, SQL and React at work. I've made and maintained
+                    I write Typescript, GraphQL and React at work. I've made and maintained
                     internal and public REST APIs, event-driven microservices in Azure,
                     complex UIs with React and Redux, and all the goo in-between.
-                    </p>
+                </p>
                 <p>
-                    I enjoy learning with my colleagues as we modernize our SaaS webiste, and
-                    by playing with technology in personal projects, like this site.
-                    </p>
-                <p>
-                    I'm excited to share my thoughts here as I continue learn more about
-                    Software Development.
-                    </p>
+                    I enjoy learning from my colleagues at Mystery, and
+                    playing with technology in personal projects, like this site.
+                </p>
             </Text>
         </OneColumn>
     </Background >
